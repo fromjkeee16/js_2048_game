@@ -12,6 +12,20 @@ const LABEL = Object.freeze({
 });
 
 const Game = require('../modules/Game.class');
+
+// initialize the game with parameters:
+/**
+ * const game = new Game({
+      startTilesAmount: 5,
+      initialState: [
+        [0, 0, 0, 0],
+        [0, 4, 0, 0],
+        [0, 0, 9, 0],
+        [0, 0, 0, 2],
+      ],
+      forcePowerOfTwo: true,
+});
+ */
 const game = new Game();
 
 const gameContainer = document.querySelector('.container');
@@ -47,6 +61,9 @@ function updateGameStatusMessage() {
   actionButton.textContent = isGameIdle ? LABEL.Start : LABEL.Restart;
 
   switch (gameStatus) {
+    case Game.STATUS.Idle:
+      messageStart.classList.remove(CLASSNAME.Hidden);
+      break;
     case Game.STATUS.Won:
       messageWin.classList.remove(CLASSNAME.Hidden);
       break;
@@ -73,8 +90,16 @@ function updateGameBoard() {
 }
 
 document.addEventListener('keydown', (ev) => {
-  if (Game.MOVE_KEYS.includes(ev.key)) {
-    ev.preventDefault();
+  const gameStatus = game.getStatus();
+  const validKeyPressed = Game.MOVE_KEYS.includes(ev.key);
+
+  if (!validKeyPressed) {
+    return;
+  }
+
+  ev.preventDefault();
+
+  if (gameStatus === Game.STATUS.Playing) {
     game.move(ev.key);
     renderGame();
   }
@@ -91,5 +116,7 @@ actionButton.addEventListener('click', () => {
 
 scoreInfo.addEventListener('click', () => {
   // eslint-disable-next-line no-console
-  console.log(game.getScore());
+  console.log(game.getState());
 });
+
+renderGame();
